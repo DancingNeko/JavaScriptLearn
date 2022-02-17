@@ -10,8 +10,10 @@ Game = {
                 alert(`Number too big: ${this.guess}`)
             else if(this.guess < this.number)
                 alert(`Number too small: ${this.guess}`)
+            else if(this.guess == this.number)
+                alert("Congratulations! You win the game!")
             else
-            alert("Congratulations! You win the game!")
+                alert('invalid input')
         }
     }
 };
