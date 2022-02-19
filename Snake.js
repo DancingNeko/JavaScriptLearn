@@ -6,7 +6,10 @@ path = [[0,0]];
 dir = directions[2]; //current direction
 loc = [0,0]; // location on map: [x,y]
 objectLoc = [parseInt(Math.random()*mapSize),parseInt(Math.random()*mapSize)];
+objectGot = 0;
 speed = 100;
+turned = false; //reset after every round, prevent 2 keystrokes in single round
+speedChanged  = false;
 
 
 //from https://stackoverflow.com/questions/30097815/javascript-change-line-height-of-body
@@ -21,10 +24,11 @@ else
 }
 
 function reachObject(){
-  if(loc[0] == objectLoc[0] && loc[1] == objectLoc[1]){
-    while(loc[0] == objectLoc[0] && loc[1] == objectLoc[1]) //prevent spawn on the same location
+  if(loc[0] == objectLoc[0] && loc[1] == objectLoc[1]){ //if got the object
+    while(collideWithBody(objectLoc) || compareArray(objectLoc, loc))  //prevent spawn on the same location as body & head
       objectLoc = [parseInt(Math.random()*mapSize),parseInt(Math.random()*mapSize)];
-      map[objectLoc[1]] = replaceCharAt(map[objectLoc[1]], String.fromCharCode(10084), objectLoc[0])
+    map[objectLoc[1]] = replaceCharAt(map[objectLoc[1]], String.fromCharCode(10084), objectLoc[0]);
+    objectGot++;
     return true;
   }
   return false;
@@ -39,6 +43,14 @@ function compareArray(arr1, arr2){
   return true;
 }
 
+function collideWithBody(position){
+  for(let i = 0; i < path.length; i++){
+    if(compareArray([position[0],position[1]],path[i]))
+      return true;
+  }
+  return false;
+}
+
 function goForward(){
   let x = loc[0];
   let y = loc[1];
@@ -50,11 +62,14 @@ function goForward(){
     loc[1]++;
   if(dir == 'west' && loc[0] > 0)
     loc[0]--;
-  for(let i = 0; i < path.length; i++){
-      if(compareArray([loc[0],loc[1]],path[i]))
-        return false;
+  if(!reachObject()){
+    let deleteLoc = path.shift();
+    map[deleteLoc[1]] = replaceCharAt(map[deleteLoc[1]], String.fromCharCode(9634), deleteLoc[0])
   }
-  path.push([loc[0],loc[1]])
+  if(collideWithBody(loc)){
+    return false;
+  }
+  path.push([loc[0],loc[1]]);
   if(loc[0] == x && loc[1] == y){
     return false;
   }
@@ -66,18 +81,14 @@ function replaceCharAt(str, char, index){ //replace character at index
 }
 
 function move(){
+  turned = false;
   if(!goForward()){
-    confirm("Game Over!")
+    confirm(`Game Over! You scored ${objectGot}, speed ${speed}`);
     return false;
   }
-  if(dir == 'north' || dir == 'south')
   map[loc[1]] = replaceCharAt(map[loc[1]], String.fromCharCode(9608), loc[0])
-    else
-    map[loc[1]] = replaceCharAt(map[loc[1]], String.fromCharCode(9608), loc[0])
-  if(!reachObject()){
-    let deleteLoc = path.shift();
-    map[deleteLoc[1]] = replaceCharAt(map[deleteLoc[1]], String.fromCharCode(9634), deleteLoc[0])
-  }
+  speed = Math.floor(1/(0.001*(objectGot + 20))+50); //formula for speed incrememt (smaller faster, capped at 50)
+  speedChanged = true;
   return true;
 }
 
@@ -102,21 +113,33 @@ function arryToHTML(){
 
 
 document.addEventListener('keypress', (event) => {
+    if(turned)
+      return; // no response if already turned this interval
     var key = event.key;
+    turned = true;
     if(key == 'w' && dir != 'south')
       dir = 'north';
-    if(key == 'd' && dir != 'west')
+    else if(key == 'd' && dir != 'west')
       dir = 'east';
-    if(key == 's' && dir != 'north')
+    else if(key == 's' && dir != 'north')
       dir = 'south';
-    if(key == 'a' && dir != 'east')
+    else if(key == 'a' && dir != 'east')
       dir = 'west';
+    else
+      turned = false;
   }, false);
 
 
-interval = setInterval(()=>{
+function intervalCall(){
+  if(speedChanged){
+    speedChanged = false;
+    clearInterval(interval);
+    interval = setInterval(intervalCall, speed);
+  }
   if(!move()){
     clearInterval(interval);
   }
   document.body.innerHTML = (arryToHTML(map));
-}, 100)
+}
+
+interval = setInterval(intervalCall, speed);
