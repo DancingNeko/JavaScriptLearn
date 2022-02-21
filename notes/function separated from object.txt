@@ -1,0 +1,17 @@
+a function will be separated from its object(container) if passed directly as a reference
+
+setTimout(myCat.logInfo);
+// is equivalent to:
+const extractedLogInfo = myCat.logInfo;
+setTimout(extractedLogInfo);
+// the "this" pointer in the logInfo here will point to undefined rather than "myCat" object
+
+if don't want to be separate, use bind() function
+
+// Create a bound function
+const boundLogInfo = myCat.logInfo.bind(myCat);
+
+Or define logInfo as an arrow function in myCat:
+const logInfo = () => {...}
+
+source: https://dmitripavlutin.com/gentle-explanation-of-this-in-javascript/#32-pitfall-separating-method-from-its-object

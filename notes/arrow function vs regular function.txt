@@ -1,0 +1,14 @@
+arrow function:
+1. "this" keyword refer to who calls this function
+2. cannot construct (use new keyword)
+3. will bind to its owner whenever assigned as reference (see "function separated from object.txt")
+
+regular function:
+1. "this" keyword refer to who owns this function (object, function, global/window)
+2. have constructor
+3. will be separated as an independent function when assigned by a reference
+
+
+
+source:	https://dmitripavlutin.com/differences-between-arrow-and-regular-functions/
+	https://www.w3schools.com/js/js_arrow_function.asp
