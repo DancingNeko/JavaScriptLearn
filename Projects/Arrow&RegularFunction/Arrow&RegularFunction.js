@@ -9,6 +9,6 @@ const myObject = {
 
 
 
-myObject.test();
+myObject.test(); // check the result in the console
 myObject.test1();
 

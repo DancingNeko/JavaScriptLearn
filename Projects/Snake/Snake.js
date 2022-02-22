@@ -87,7 +87,7 @@ function move(){
     return false;
   }
   map[loc[1]] = replaceCharAt(map[loc[1]], String.fromCharCode(9608), loc[0])
-  speed = Math.floor(1/(0.001*(objectGot + 20))+50); //formula for speed incrememt (smaller faster, capped at 50)
+  speed = Math.floor(1/(0.001*(objectGot + 20))+Math.max((100-mapSize),50)); //formula for speed incrememt (smaller faster, capped at 50)
   speedChanged = true;
   return true;
 }
