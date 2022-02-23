@@ -1,0 +1,20 @@
+#canvas {
+    position: relative;
+}
+#chaosButton, #glowCircleButton, #snowSlider {
+    position: absolute;
+    z-index: 10;
+}
+
+#chaosButton{
+    top: 2%;
+    left: 2%;
+}
+#glowCircleButton{
+    top: 8%;
+    left: 2%;
+}
+#snowSlider{
+    top: 12%;
+    left: 2%;
+}

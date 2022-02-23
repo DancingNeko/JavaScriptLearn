@@ -4,13 +4,24 @@ let canvas = document.getElementById("draw");
 let ctx = canvas.getContext("2d");
 tick = 0; // record setInterval ticks
 circles = [];
+chaosOn = false;
+snowOn = false;
+snowflakes = 100;
+snowSlider = document.getElementById("snowSlider");
+
+snowSlider.oninput = function(){
+    snowflakes = this.value;
+}
 
 function paint(){
     tick++;
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    chaos();
-    for(let i = 0; i < circles.length; i++){
-        circles[i].draw();
+    if(chaosOn)
+        chaos();
+    if(snowOn){
+        for(let i = 0; i < snowflakes; i++){
+            circles[i].draw();
+        }
     }
 }
 
@@ -40,10 +51,18 @@ class glowCircle{
 }
 
 function chaos(){
-    for(let i = 0; i < 50; i++){
+    for(let i = 0; i < snowflakes; i++){
     ctx.fillStyle = `hsl(${parseInt(Math.random()*360)}, 100%, 40%)`;
     ctx.fillRect(parseInt(Math.random()*canvas.width),parseInt(Math.random()*canvas.height),parseInt(Math.random()*60),parseInt(Math.random()*60));
     }
+}
+
+function chaosSwitch(){
+    chaosOn = !chaosOn;
+}
+
+function circleSwitch(){
+    snowOn = !snowOn;
 }
 
 
@@ -51,5 +70,5 @@ function chaos(){
 
 
 
-prepareCircle(100);
+prepareCircle(500);
 setInterval(paint, 100);
