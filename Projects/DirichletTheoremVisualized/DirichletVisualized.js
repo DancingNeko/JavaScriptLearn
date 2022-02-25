@@ -30,7 +30,7 @@ function drawChart(){
         data:{
             labels: xLabels,
             datasets:[{
-                fillColor: "black",
+                backgroundColor: "black",
                 data: yValues
             }]
         },
