@@ -1,0 +1,18 @@
+#slider{
+    position: absolute;
+    top: auto;
+    left: auto;
+    z-index: 10;
+}
+
+#primeIndicator{
+    position: absolute;
+    top: auto;
+    left: 10%;
+    z-index: 10;
+}
+
+#primeChart{
+    top: auto;
+    left: auto;
+}
