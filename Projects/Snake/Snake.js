@@ -10,6 +10,7 @@ objectGot = 0;
 speed = 100;
 turned = false; //reset after every round, prevent 2 keystrokes in single round
 speedChanged  = false;
+speedUp = false;
 
 
 //from https://stackoverflow.com/questions/30097815/javascript-change-line-height-of-body
@@ -113,9 +114,14 @@ function arryToHTML(){
 
 
 document.addEventListener('keypress', (event) => {
+    var key = event.key;
+    if(key == ' '){ // speed up or slow down snake
+      speedUp = !speedUp;
+      speedChanged = true;
+      return;
+    }
     if(turned)
       return; // no response if already turned this interval
-    var key = event.key;
     turned = true;
     if(key == 'w' && dir != 'south')
       dir = 'north';
@@ -134,7 +140,10 @@ function intervalCall(){
   if(speedChanged){
     speedChanged = false;
     clearInterval(interval);
-    interval = setInterval(intervalCall, speed);
+    if(!speedUp)
+      interval = setInterval(intervalCall, speed*3);
+    else
+      interval = setInterval(intervalCall, speed);
   }
   if(!move()){
     clearInterval(interval);
@@ -142,4 +151,4 @@ function intervalCall(){
   document.body.innerHTML = (arryToHTML(map));
 }
 
-interval = setInterval(intervalCall, speed);
+interval = setInterval(intervalCall, speed*3);
