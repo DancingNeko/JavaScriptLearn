@@ -1,8 +1,8 @@
 let canvas = document.getElementsByClassName("Canvas")[0];
 let ctx = canvas.getContext("2d");
 let interval = 16; // ~60fps
-const SCREEN_WIDTH = window.innerWidth;
-const SCREEN_HEIGHT = window.innerHeight;
+const SCREEN_WIDTH = Math.min(screen.availWidth, window.innerWidth);
+const SCREEN_HEIGHT = Math.min(screen.availHeight, window.innerHeight);
 canvas.width = SCREEN_WIDTH;
 canvas.height = SCREEN_HEIGHT;
 const SNOW_AMOUNT = 100;
@@ -15,6 +15,8 @@ gameStart = false;
 function gameOverAnimation(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.drawImage(bg,0,0);
+    ctx.fillStyle = "rgb(255,0,0)";
+    ctx.fillText(ticks, SCREEN_WIDTH - 100, 0);
     env.draw();
     chibi.update();
     chibi.draw();
@@ -73,16 +75,16 @@ class Player{
             if(this.over==100)
                 this.pre_height = this.height;
             this.height = Math.pow((0.8*this.jump - 14), 2) * (-1) + 196 + this.pre_height;
-            ctx.drawImage(character[parseInt(ticks/10)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-123-parseInt(this.height)-30);
+            ctx.drawImage(character[parseInt(ticks/5)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-123-parseInt(this.height)-30);
             this.over--; 
         }
         if(this.jump <= 0){ // not in jumping
             this.height = 0;
-            ctx.drawImage(character[parseInt(ticks/10)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153);
+            ctx.drawImage(character[parseInt(ticks/5)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153);
         }
         else{ // jumping
             this.height = Math.pow((0.5*this.jump - 14), 2) * (-1) + 200;
-            ctx.drawImage(character[parseInt(ticks/10)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-123-parseInt(this.height)-30);
+            ctx.drawImage(character[parseInt(ticks/5)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-123-parseInt(this.height)-30);
         }
     }
     jumpAction(){
@@ -125,7 +127,7 @@ class Environment{
         this.obstableWidth = 50;
         this.obstaclePassed = 0;
         this.speed = 5;
-        this.nextObject = parseInt(Math.random()*70+120);
+        this.nextObject = parseInt(Math.random()*110+70);
     }
     update(){
         this.nextObject--;
@@ -154,7 +156,7 @@ class Environment{
         }
         if(this.nextObject<=0){
             this.obstacles.push([SCREEN_WIDTH,parseInt(Math.random()*50+30)]);
-            this.nextObject = parseInt(Math.random()*70+120);
+            this.nextObject = parseInt(Math.random()*110+70);
         }
     }
     draw(){
@@ -199,10 +201,10 @@ for(let i = 0; i < 7; i++){
 }
 chibi = new Player();
 chibi.jumpAction.bind(chibi);
-document.addEventListener('click', interact ,false);
+canvas.addEventListener('click', ()=>{if(!gameOver && chibi.jump <= 0)interact();} ,false);
 document.addEventListener('keypress', (event) => {
     var key = event.key;
-    if(key == ' ')
+    if(key == ' ' && !gameOver && chibi.jump <= 0)
         interact();
 });
 env = new Environment();
@@ -220,5 +222,16 @@ startImg.onload = ()=>{
 }
 var jumpSE = new Audio("./jump.mp3");
 var gameOverSE = new Audio("./gameover.mp3");
+let muteButton = document.getElementById("mute");
+muteButton.onclick = function(){
+    if(audio.volume > 0){
+        this.textContent = "Music Off"
+        audio.volume = 0;
+    }
+    else{
+        this.textContent = "Music On"
+        audio.volume = 1;
+    }
+}
 // intiazation ends
 
