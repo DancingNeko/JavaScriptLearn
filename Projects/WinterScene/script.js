@@ -166,6 +166,18 @@ class Environment{
     }
 }
 
+function interact(){
+    if(!gameStart){
+        audio.play();
+        gameStart = true;
+        setTimeout(redraw, interval);
+    }
+    else{
+        chibi.jumpAction();
+        jumpSE.play();
+    }
+}
+
 // initialize everything
 snowflakes = [];
 for(let i = 0; i < SNOW_AMOUNT; i++){
@@ -187,17 +199,12 @@ for(let i = 0; i < 7; i++){
 }
 chibi = new Player();
 chibi.jumpAction.bind(chibi);
-document.addEventListener('click', (event) => {
-    if(!gameStart){
-        audio.play();
-        gameStart = true;
-        setTimeout(redraw, interval);
-    }
-    else{
-        chibi.jumpAction();
-        jumpSE.play();
-    }
-},false);
+document.addEventListener('click', interact ,false);
+document.addEventListener('keypress', (event) => {
+    var key = event.key;
+    if(key == ' ')
+        interact();
+});
 env = new Environment();
 var gameOverImg = new Image();
 gameOverImg.src = "./gameover.png"
@@ -209,7 +216,7 @@ audio.addEventListener('ended', function() {
 startImg = new Image();
 startImg.src = "./start.png";
 startImg.onload = ()=>{
-    ctx.drawImage(startImg,parseInt(Math.abs(417.5-SCREEN_WIDTH/2)),parseInt(417.5-SCREEN_HEIGHT/2));
+    ctx.drawImage(startImg,parseInt(Math.abs(SCREEN_WIDTH/2-176)),parseInt(SCREEN_HEIGHT/2-176));
 }
 var jumpSE = new Audio("./jump.mp3");
 var gameOverSE = new Audio("./gameover.mp3");
