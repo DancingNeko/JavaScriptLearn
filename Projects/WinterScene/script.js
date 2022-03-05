@@ -35,7 +35,7 @@ function redraw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
 
-
+    // draw graphics
     ctx.drawImage(bg,0,0);
     env.update();
     env.draw();
@@ -45,14 +45,14 @@ function redraw(){
         item.move();
         item.draw();
     });
-    
+    // end draw
 
 
     ticks++;
     setTimeout(redraw, interval);
     }
     else{
-    chibi.jumpAction();
+    chibi.jumpAction(); // chibi drop when game ends
     setTimeout(gameOverAnimation, 16);
     }
 }
@@ -127,7 +127,7 @@ class Environment{
         this.obstableWidth = 50;
         this.obstaclePassed = 0;
         this.speed = 5;
-        this.nextObject = parseInt(Math.random()*110+70);
+        this.nextObject = parseInt(Math.random()*110+50); // next object distance
     }
     update(){
         this.nextObject--;
@@ -156,7 +156,7 @@ class Environment{
         }
         if(this.nextObject<=0){
             this.obstacles.push([SCREEN_WIDTH,parseInt(Math.random()*50+30)]);
-            this.nextObject = parseInt(Math.random()*110+70);
+            this.nextObject = parseInt(Math.random()*110+50);
         }
     }
     draw(){
