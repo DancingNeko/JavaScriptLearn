@@ -1,8 +1,9 @@
 let canvas = document.getElementsByClassName("Canvas")[0];
 let ctx = canvas.getContext("2d");
 let interval = 16; // ~60fps
-const SCREEN_WIDTH = Math.min(screen.availWidth, window.innerWidth);
-const SCREEN_HEIGHT = Math.min(screen.availHeight, window.innerHeight);
+let pixRatio = window.devicePixelRatio || 1;
+const SCREEN_WIDTH = screen.width * pixRatio;
+const SCREEN_HEIGHT = screen.height * pixRatio;
 canvas.width = SCREEN_WIDTH;
 canvas.height = SCREEN_HEIGHT;
 const SNOW_AMOUNT = 100;
