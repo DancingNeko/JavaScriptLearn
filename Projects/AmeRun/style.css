@@ -1,7 +1,18 @@
 #mute{
     position: absolute;
     top: 5%;
-    left: 5%;
+    left: auto;
+    width: auto;
+    height: auto;
+    z-index: 10;
+    font-family: verdana;
+    font-size: 30px;
+}
+
+#frameRate{
+    position: absolute;
+    top: 5%;
+    left: 14%;
     width: auto;
     height: auto;
     z-index: 10;
