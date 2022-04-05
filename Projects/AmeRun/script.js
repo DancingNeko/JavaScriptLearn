@@ -2,18 +2,28 @@ let canvas = document.getElementsByClassName("Canvas")[0];
 let ctx = canvas.getContext("2d");
 ctx.canvas.width = window.innerWidth; // huge thanks to devyn's answer to canvas resizing under the post:
 ctx.canvas.height = window.innerHeight; // https://stackoverflow.com/questions/1664785/resize-html5-canvas-to-fit-window/3078427#3078427
-let interval = 16; // ~60fps
+let interval = 17; // ~60fps
 const SCREEN_WIDTH = canvas.width;
 const SCREEN_HEIGHT = canvas.height;
 const SNOW_AMOUNT = 100;
 document.body.style.backgroundColor = "rgb(0,0,0)"
 ctx.fillStyle = "rgb(255,255,255)";
 ticks = 0;
+frameCount = 0;
+ticksIncrement = 1;
 gameOver = false;
 restartPermitted = false;
 gameStart = false;
 endTick = -1;
 restart = false;
+
+lowFrameRate = false;
+
+function ticksUpdate(){
+    frameCount++;
+    ticks += ticksIncrement;
+    return parseInt(ticks);
+}
 
 function gameOverAnimation(){
     if(!restart){
@@ -34,8 +44,8 @@ function gameOverAnimation(){
         ctx.globalAlpha = Math.abs(ticks%100-50)/50;
         ctx.drawImage(gameOverImg, parseInt(SCREEN_WIDTH/2-275), parseInt(SCREEN_HEIGHT/2-210));
         ctx.globalAlpha = 1;
-        ticks++;
-        setTimeout(gameOverAnimation,16);
+        ticksUpdate();
+        setTimeout(gameOverAnimation,interval);
     }
     else{
         restart = false;
@@ -64,13 +74,13 @@ function redraw(){
     ctx.fillStyle = "rgb(255,255,255)"
     ctx.fillText(String(parseInt(ticks/60)).padStart(5, '0'), SCREEN_WIDTH - 150, parseInt(0.05*SCREEN_HEIGHT));
 
-    ticks++;
+    ticksUpdate();
     setTimeout(redraw, interval);
     }
     else{
     endTick = ticks;
     chibi.jumpAction(); // chibi drop when game ends
-    setTimeout(gameOverAnimation, 16);
+    setTimeout(gameOverAnimation, interval);
     }
 }
 
@@ -88,14 +98,14 @@ class Player{
         if(gameOver)
             this.jump++;
         else
-            this.jump--;
+            this.jump-=parseInt(ticksIncrement);
     }
     draw(){
         if(gameOver){ // animation of game over
             if(this.over==100)
                 this.pre_height = this.height;
             this.height = Math.pow((0.8*this.jump - 14), 2) * (-1) + 196 + this.pre_height;
-            ctx.drawImage(character[parseInt(ticks/5)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-parseInt(this.height)-env.elevation);
+            ctx.drawImage(character[parseInt(frameCount/parseInt(80/interval))%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-parseInt(this.height)-env.elevation);
             this.over--; 
         }
         if(this.dropDistance > 0){ // in ground pound/drop state
@@ -103,12 +113,12 @@ class Player{
                 this.dropDistance = 0;
                 this.dropStart = 0;
                 this.dropFrame = 5;
-                ctx.drawImage(character[parseInt(ticks/5)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-env.elevation);
+                ctx.drawImage(character[parseInt(frameCount/parseInt(80/interval))%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-env.elevation);
                 return;
             }
             this.height = this.dropDistance/5*(5-this.dropStart);
             this.dropStart++;
-            ctx.drawImage(character[parseInt(ticks/5)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-env.elevation-parseInt(this.height));
+            ctx.drawImage(character[parseInt(frameCount/parseInt(80/interval))%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-env.elevation-parseInt(this.height));
         }
         else if(this.jump <= 0){ // not in jumping
             this.height = 0;
@@ -116,13 +126,13 @@ class Player{
                 if(this.dropFrame == 5)
                     dropSE.play();
                 ctx.drawImage(dropImg[this.dropFrame], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-env.elevation);
-                if(ticks%3 == 0)
+                if(frameCount%3 == 0)
                 this.dropFrame++;
                 if(this.dropFrame == 10)
                     this.dropFrame = -1;
             }
             else
-                ctx.drawImage(character[parseInt(ticks/5)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-env.elevation);
+                ctx.drawImage(character[parseInt(frameCount/parseInt(80/interval))%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-env.elevation);
         }
         else{ // jumping
             this.height = Math.pow((0.5*this.jump - 14), 2) * (-1) + 200; // formula for jumping curve
@@ -135,7 +145,7 @@ class Player{
                     this.dropFrame = -1;
             }
             else
-                ctx.drawImage(character[parseInt(ticks/5)%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-parseInt(this.height)-env.elevation);
+                ctx.drawImage(character[parseInt(frameCount/parseInt(80/interval))%7], parseInt(Math.max(SCREEN_WIDTH/5,123)), SCREEN_HEIGHT-153-parseInt(this.height)-env.elevation);
         }
     }
     jumpAction(){
@@ -189,29 +199,27 @@ class Environment{
         this.elevateUp = true;
     }
     update(){
-        this.nextObject--;
+        this.nextObject-=parseInt(ticksIncrement);
         for(let i =0; i < this.obstacles.length; i++){
             let item = this.obstacles[i];
             if(item[0] <= -1*item[2]){ // check if obstacle move out of screen, if so remove from list
                 this.obstacles.splice(i,1);
                 i--;
                 this.obstaclePassed++;
-                if(this.obstaclePassed <= 5)
-                    interval = 16;
-                else if(this.obstaclePassed <= 40)
-                    interval = parseInt(16-this.obstaclePassed*0.3);
-                else
-                    interval = 2;
+                if(this.obstaclePassed <= 100)
+                    ticksIncrement *= 1.01;
                 continue;
             }
+
             if(Math.abs(item[0] + item[2]/2 - parseInt(Math.max(SCREEN_WIDTH/5,123)) - 61.5) < 35 + item[2]/2){ // collision check,, 61.5 is half size of character, 60 is character width
+
                 if(chibi.height+10 <= item[1]){
                     gameOver = true;
                     bgm.pause();
                     gameOverSE.play();
                 }
             }
-            item[0]-=this.speed; // move object x position
+            item[0]-=this.speed*parseInt(ticksIncrement); // move object x position
         }
         if(this.nextObject<=0){ // create new obstacle
             this.obstacles.push([SCREEN_WIDTH,parseInt(Math.random()*90+30),this.obstableWidth]); // min height 30 max height 120
@@ -220,12 +228,12 @@ class Environment{
         }
         // update elevation of ground
         if(this.elevation < this.targetElevation && this.elevateUp)
-            this.elevation+=2;
+            this.elevation+=parseInt(2*ticksIncrement);
         else if(this.elevateUp){
             this.elevateUp = false;
         }
         else if(!this.elevateUp && this.elevation > 0)
-            this.elevation-=2;
+            this.elevation-=parseInt(2*ticksIncrement);
         else if(!this.elevateUp && this.elevation == 0){
             this.elevateUp = true;
             this.targetElevation = parseInt(Math.random()*SCREEN_HEIGHT*0.25);
@@ -267,7 +275,14 @@ function initiation(){
     chibi.jumpAction.bind(chibi);
     bgm.currentTime = 0;
     ticks = 0;
+    if(lowFrameRate){
+    interval = 33;
+    ticksIncrement = 2;
+    }
+    else{
     interval = 16;
+    ticksIncrement = 1;
+    }
     restart = true;
     gameStart = false;
     gameOver = false;
@@ -315,6 +330,22 @@ ctx.fillStyle = "rgb(255,255,255)";
 ctx.fillText("Space/Click to jump", parseInt(0.1*SCREEN_WIDTH), parseInt(0.4*SCREEN_HEIGHT));
 ctx.fillText("Space/Click on air to ground pound", parseInt(0.1*SCREEN_WIDTH), parseInt(0.5*SCREEN_HEIGHT));
 ctx.fillText("Space/Click to start!", parseInt(0.1*SCREEN_WIDTH), parseInt(0.6*SCREEN_HEIGHT));
+const frameRateButton = document.getElementById("frameRate");
+frameRateButton.onclick = function(){
+    this.blur();
+    if(lowFrameRate == false){
+        this.textContent = "30 fps";
+        lowFrameRate = true;
+        interval = 33;
+        ticksIncrement = 2;
+    }
+    else{
+        this.textContent = "60 fps";
+        lowFrameRate = false;
+        interval = 17;
+        ticksIncrement = 1;
+    }
+}
 
 var jumpSE = new Audio("./jump.mp3");
 var gameOverSE = new Audio("./gameover.mp3");
