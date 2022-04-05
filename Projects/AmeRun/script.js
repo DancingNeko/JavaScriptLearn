@@ -16,6 +16,9 @@ restartPermitted = false;
 gameStart = false;
 endTick = -1;
 restart = false;
+previousFrame = 0; // previous frame timestamp
+
+date = new Date();
 
 lowFrameRate = false;
 
@@ -23,6 +26,13 @@ function ticksUpdate(){
     frameCount++;
     ticks += ticksIncrement;
     return parseInt(ticks);
+}
+
+function calculateTimeInterval(){
+    date = new Date();
+    result = Math.max(Math.min(previousFrame+interval-date.getTime(),interval),0);
+    previousFrame = date.getTime();
+    return result;
 }
 
 function gameOverAnimation(){
@@ -45,7 +55,8 @@ function gameOverAnimation(){
         ctx.drawImage(gameOverImg, parseInt(SCREEN_WIDTH/2-275), parseInt(SCREEN_HEIGHT/2-210));
         ctx.globalAlpha = 1;
         ticksUpdate();
-        setTimeout(gameOverAnimation,interval);
+        thisInterval = calculateTimeInterval();
+        setTimeout(gameOverAnimation, thisInterval);
     }
     else{
         restart = false;
@@ -75,12 +86,14 @@ function redraw(){
     ctx.fillText(String(parseInt(ticks/60)).padStart(5, '0'), SCREEN_WIDTH - 150, parseInt(0.05*SCREEN_HEIGHT));
 
     ticksUpdate();
-    setTimeout(redraw, interval);
+    thisInterval = calculateTimeInterval();
+    setTimeout(redraw, thisInterval);
     }
     else{
     endTick = ticks;
     chibi.jumpAction(); // chibi drop when game ends
-    setTimeout(gameOverAnimation, interval);
+    thisInterval = calculateTimeInterval();
+    setTimeout(gameOverAnimation, thisInterval);
     }
 }
 
@@ -254,6 +267,8 @@ function interact(){
     else if(!gameStart){
         bgm.play();
         gameStart = true;
+        date = new Date();
+        previousFrame =  date.getTime();
         setTimeout(redraw, interval);
     }
     else if(chibi.jump >= 10 && chibi.dropDistance == 0){ // drop animation
