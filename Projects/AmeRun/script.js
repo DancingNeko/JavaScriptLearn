@@ -204,7 +204,7 @@ class Environment{
                     interval = 2;
                 continue;
             }
-            if(Math.abs(item[0] + item[2]/2 - parseInt(Math.max(SCREEN_WIDTH/5,123)) - 61.5) < 60){ // collision check,, 61.5 is half size of character, 60 is character width
+            if(Math.abs(item[0] + item[2]/2 - parseInt(Math.max(SCREEN_WIDTH/5,123)) - 61.5) < 35 + item[2]/2){ // collision check,, 61.5 is half size of character, 60 is character width
                 if(chibi.height+10 <= item[1]){
                     gameOver = true;
                     bgm.pause();
